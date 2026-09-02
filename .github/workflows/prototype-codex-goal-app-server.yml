@@ -15,6 +15,9 @@ jobs:
     runs-on: [self-hosted, Linux, X64]
     timeout-minutes: 5
     steps:
+      - name: Check out prototype
+        uses: actions/checkout@v4
+
       - name: Inspect Codex Goal prerequisites
         shell: bash
         run: |
@@ -24,3 +27,7 @@ jobs:
           codex features list | awk '$1 == "goals" { print; found = 1 } END { exit !found }'
           codex login status
           codex app-server --help | sed -n '1,35p'
+
+      - name: Probe automatic Goal continuation
+        shell: bash
+        run: node prototype/app-server-goal-probe.mjs
