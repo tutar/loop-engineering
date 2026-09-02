@@ -1,0 +1,26 @@
+name: PROTOTYPE Codex Goal App Server
+
+on:
+  push:
+    branches:
+      - prototype/codex-goal-app-server
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    name: Runner preflight
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 5
+    steps:
+      - name: Inspect Codex Goal prerequisites
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v codex
+          codex --version
+          codex features list | awk '$1 == "goals" { print; found = 1 } END { exit !found }'
+          codex login status
+          codex app-server --help | sed -n '1,35p'
