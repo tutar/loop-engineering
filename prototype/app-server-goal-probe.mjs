@@ -84,7 +84,7 @@ try {
     threadId,
     objective,
     status: "active",
-    tokenBudget: 3000,
+    tokenBudget: 30000,
   });
 
   // Goal activation may itself schedule the first Turn. If it does not, seed
