@@ -31,3 +31,7 @@ jobs:
       - name: Probe automatic Goal continuation
         shell: bash
         run: node prototype/app-server-goal-probe.mjs
+
+      - name: Probe Goal lifecycle and restart recovery
+        shell: bash
+        run: node prototype/app-server-goal-lifecycle-probe.mjs
