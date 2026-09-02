@@ -1,17 +1,17 @@
 # github-development-ticket v0.1.0
 
-将带 `ready-for-agent` 标签的 Development Ticket（研发票据）交给 Codex Goal Runtime，由 Matt `$implement` Skill 完成实现、自测、review、commit、push 与 Draft PR。
+将同时带 `ready-for-agent` 与 `development-ticket` 标签的 Development Ticket（研发票据）交给 Codex Goal Runtime，由 Matt `$implement` Skill 完成实现、自测、review、commit、push 与 Draft PR。
 
 这是可复制的 Workflow Definition（工作流定义），不是远程依赖。`files/` 中的路径与 Consumer Project（消费项目）仓库根目录相同；复制后形成由项目自行维护的 Workflow Instance（工作流实例）。
 
 ## 接入
 
 1. 将 `files/.github/` 复制到项目根目录的 `.github/`。
-2. 为仓库添加名为 `ready-for-agent` 和 `in-progress` 的标签。
+2. 为仓库添加名为 `ready-for-agent`、`development-ticket` 和 `in-progress` 的标签。
 3. 配置能够运行 `codex`、`gh` 和 Node.js 20+ 的持久化 self-hosted runner。
 4. 确认 GitHub Actions 可以写入 contents、issues 与 pull requests，并允许 Actions 创建 Pull Request。
 5. 根据项目实际情况修改 Workflow 中的 runner labels、默认分支、Git identity、超时和 token budget。
-6. 创建至少包含业务目标与 Acceptance Criteria（验收条件）的 Issue，再添加 `ready-for-agent` 标签。
+6. 创建至少包含业务目标与 Acceptance Criteria（验收条件）的 Issue，先添加 `ready-for-agent`，确认它是可直接实现的 Ticket 后，再手动添加 `development-ticket`。
 
 也可以从 Actions 页面手动运行 Workflow，并提供 Issue number（Issue 编号）。
 
@@ -19,11 +19,12 @@
 
 一次运行只处理一个 Issue：
 
-1. Workflow 以 `repository + issue_number` 作为 Ticket 身份，并用同一身份设置并发组。
-2. Controller 只在该 Issue 的机器评论中查找 Thread Record（线程记录）。
-3. 找不到记录时创建新 Thread，设置 Goal 后立即把 Thread ID 写回该 Issue。
-4. 找到记录时只恢复该 Issue 对应的 Thread；若 Goal 已经 `complete`，直接成功结束，不再次激活。
-5. Goal 成功后，Workflow 独立检查工作树、远端开发分支和 Draft PR 是否符合交付要求。
+1. 新增 `development-ticket` 标签时，Workflow 验证 Issue 仍为 open 并同时具有 `ready-for-agent`；仅有 `ready-for-agent` 的 Spec 不会进入本 Workflow。
+2. Workflow 以 `repository + issue_number` 作为 Ticket 身份，并用同一身份设置并发组。
+3. Controller 只在该 Issue 的机器评论中查找 Thread Record（线程记录）。
+4. 找不到记录时创建新 Thread，设置 Goal 后立即把 Thread ID 写回该 Issue。
+5. 找到记录时只恢复该 Issue 对应的 Thread；若 Goal 已经 `complete`，直接成功结束，不再次激活。
+6. Goal 成功后，Workflow 独立检查工作树、远端开发分支和 Draft PR 是否符合交付要求。
 
 因此 Issue #1 已有 Thread 不会导致 Issue #2 被恢复：Issue #2 的评论中没有自己的 Thread Record，第一次运行一定创建新 Thread。
 

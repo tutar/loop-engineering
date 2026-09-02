@@ -23,7 +23,7 @@ jobs:
   implement:
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      (github.event.action == 'labeled' && github.event.label.name == 'ready-for-agent')
+      (github.event.action == 'labeled' && github.event.label.name == 'development-ticket')
     runs-on: [self-hosted, Linux, X64]
     timeout-minutes: 120
     env:
@@ -40,6 +40,8 @@ jobs:
           test "$(gh issue view "${ISSUE_NUMBER}" --json state --jq .state)" = "OPEN"
           test "$(gh issue view "${ISSUE_NUMBER}" --json labels \
             --jq 'any(.labels[]; .name == "ready-for-agent")')" = true
+          test "$(gh issue view "${ISSUE_NUMBER}" --json labels \
+            --jq 'any(.labels[]; .name == "development-ticket")')" = true
 
       - name: Check out default branch
         uses: actions/checkout@v4
