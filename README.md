@@ -4,7 +4,8 @@
 
 ## 已发布定义
 
-- [`github-development-ticket` v0.1.1](workflow-definitions/github-development-ticket/v0.1.1/README.md)：当前版本；由同时带 `ready-for-agent` 与 `development-ticket` 标签的 GitHub Issue 启动 Codex Goal，使用 Matt `$implement` Skill 完成开发、自测、验收条件同步、提交、推送和 Draft PR。
+- [`github-development-ticket` v0.1.2](workflow-definitions/github-development-ticket/v0.1.2/README.md)：当前版本；增加中断工作恢复、可调累计预算、Stop hook 收尾、取消处理和交付标签清理。
+- [`github-development-ticket` v0.1.1](workflow-definitions/github-development-ticket/v0.1.1/README.md)：增加基于证据的验收条件同步。
 - [`github-development-ticket` v0.1.0](workflow-definitions/github-development-ticket/v0.1.0/README.md)：首个已验证版本。
 
 Workflow Definition 是普通文件模板，不是 Reusable Workflow，也不是中央 Runtime。版本号只表示实例最后参考的定义版本。
