@@ -26,6 +26,8 @@
 - 已登录且可使用 `/goal` 的 Codex；
 - GitHub Actions 对 `contents`、`issues` 和 `pull-requests` 的写权限，并允许 Actions 创建 Pull Request。
 
+在目标仓库的 **Settings → Actions → Runners** 中按 GitHub 给出的命令添加 runner；也可参考 [GitHub self-hosted runners 文档](https://docs.github.com/en/actions/hosting-your-own-runners)。当前已验证的运行形态是：持久化 self-hosted runner、Codex、Codex `/goal`、`gh` 和 Node.js 22+。GitHub-hosted runner、ephemeral runner、多个不共享 Codex Thread 存储的 runner、Claude Managed Agents 及其他 Agent Runtime 尚未验证；“尚未验证”不表示一定不支持，但本版本不承诺其中断恢复和稳定性。
+
 ### 2. 安装 Matt Skills
 
 在目标项目根目录执行：
@@ -74,6 +76,16 @@ npx skills add https://github.com/mattpocock/skills
 新增 `development-ticket` 会自动触发 Workflow。也可以在 Actions 页面手动运行 `github-development-ticket` 并输入 Issue number。第一次运行会创建 Codex Thread；后续对同一 Issue 的手动运行会恢复该 Thread，而其他 Issue 会创建自己的新 Thread。
 
 更完整的配置、停止与恢复语义见 [`github-development-ticket` v0.1.2 文档](workflow-definitions/github-development-ticket/v0.1.2/README.md)。
+
+## Optional Observability（可选可观测能力）
+
+如需将 Codex Turn、模型调用、工具调用、Token 使用和子 Agent 记录到 Langfuse，可使用 [`tutar/codex-observability-plugin`](https://github.com/tutar/codex-observability-plugin)。该仓库基于 Langfuse 官方插件维护，包含本项目在 self-hosted runner 与 Codex Stop hook 场景中遇到并验证过的修复；由于相关修复尚未及时进入官方版本，目前由该分支持续维护。
+
+该插件完全可选，不参与 Development Ticket Goal 的完成判断；未安装或 Trace 上传失败不应改变交付结果。启用前请注意：
+
+- Trace 会上传 prompt、assistant 输出、reasoning summary、工具输入输出和 Token 使用情况，应先评估代码与数据边界；
+- Runner 和 Stop hook 必须能够访问所配置的 Langfuse 地址；
+- 安装、Hook 信任、凭据与故障排查步骤以插件仓库 README 为准。
 
 ## 已发布定义
 

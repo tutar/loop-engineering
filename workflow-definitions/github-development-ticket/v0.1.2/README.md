@@ -17,6 +17,12 @@
 
 也可以从 Actions 页面手动运行 Workflow，并提供 Issue number（Issue 编号）。
 
+### Runner 支持边界
+
+当前已验证的 Runtime Profile（运行配置）是：持久化 GitHub self-hosted runner、Codex、Codex `/goal`、GitHub CLI（`gh`）和 Node.js 22+。可在目标仓库的 **Settings → Actions → Runners** 中按 GitHub 给出的命令添加 runner；通用安装与管理方式参见 [GitHub self-hosted runners 文档](https://docs.github.com/en/actions/hosting-your-own-runners)。
+
+GitHub-hosted runner、ephemeral runner、多个不共享 Codex Thread 存储的 runner、Claude Managed Agents 及其他 Agent Runtime 尚未验证。“尚未验证”不表示一定不支持，但 v0.1.2 不承诺这些形态下的中断恢复与稳定性，也不提供 runner 自动安装脚本；操作系统、代理、凭据和项目工具链由 Consumer Project 负责。
+
 ## 运行语义
 
 一次运行只处理一个 Issue：
@@ -67,3 +73,9 @@ v0.1.2 保持既有 Thread Record 格式；升级后的 Workflow Instance 会继
 - required checks、review、merge 和后续发布流程。
 
 本定义不会自动 approve、merge、deploy、跨仓库写入或动态提权，也不会绕过项目的 required checks。Harness 继续执行 sandbox 与权限边界。
+
+## 可选 Langfuse 可观测性
+
+Development Ticket Loop 不依赖 Langfuse。需要观察 Codex Turn、工具调用、Token 使用和子 Agent 时，可选用 [`tutar/codex-observability-plugin`](https://github.com/tutar/codex-observability-plugin)。该维护分支包含在 self-hosted runner 与 Codex Stop hook 场景中验证过、但尚未及时进入官方插件的修复。
+
+插件默认应 fail open（失败开放）：Trace 上传失败不能把已经完成的 Goal 改判为失败。启用前应确认 Runner/Stop hook 能访问 Langfuse，并评估 prompt、代码、reasoning summary 与工具输入输出被上传后的数据边界；具体安装和配置以插件仓库 README 为准。
