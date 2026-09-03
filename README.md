@@ -2,6 +2,79 @@
 
 本仓库维护经过真实项目验证、可整体复制到项目中的版本化 Workflow Definition（工作流定义）。项目复制后自行拥有 Workflow Instance（工作流实例），可以按项目需要修改，不依赖本仓库在线运行。
 
+## 当前进展与效果
+
+当前已经完成首个 Reference Application（参考应用）：`github-development-ticket` v0.1.2。它把一个带指定标签的 GitHub Development Ticket（研发票据）转换为 Codex `/goal`，由持久化 self-hosted runner 中的 Codex 使用 Matt `$implement` Skill 持续完成：
+
+- 读取 Issue 中的目标与 Acceptance Criteria（验收条件）；
+- 实现、自测和两轴代码审查；
+- commit、push 并创建 Draft PR；
+- 根据实际验证证据勾选已经满足的验收条件；
+- 在额度中断、Workflow 取消或临时失败后，重新运行同一 Issue 并恢复原 Codex Thread、Goal 和未提交工作；
+- 成功交付后检查分支与 Draft PR，并移除 `development-ticket` 和 `in-progress` 标签。
+
+该闭环已在 [`tutar/agent-infra`](https://github.com/tutar/agent-infra) 的真实 Development Ticket 上验证。当前范围刻意保持较窄：只交付到 Draft PR，不自动 approve、merge、deploy，也不编排多个业务节点。
+
+## Quick Start（快速开始）
+
+### 1. 准备项目
+
+目标仓库需要：
+
+- GitHub Actions；
+- 一台持久化 self-hosted runner，能够运行 Codex、GitHub CLI（`gh`）和 Node.js 22+；
+- 已登录且可使用 `/goal` 的 Codex；
+- GitHub Actions 对 `contents`、`issues` 和 `pull-requests` 的写权限，并允许 Actions 创建 Pull Request。
+
+### 2. 安装 Matt Skills
+
+在目标项目根目录执行：
+
+```bash
+npx skills add https://github.com/mattpocock/skills
+```
+
+本 Workflow 直接使用 `$implement`。`$implement` 会在适用时使用 `$tdd` 完成测试驱动实现，并在结束前使用 `$code-review` 做 Standards（规范）与 Spec（需求）两轴审查。因此需要确保安装结果至少包含：
+
+- `implement`
+- `tdd`
+- `code-review`
+
+用户只需触发 Development Ticket Workflow，不需要分别调用这三个 Skill。
+
+### 3. 复制 Workflow Definition
+
+将 [`workflow-definitions/github-development-ticket/v0.1.2/files/.github/`](workflow-definitions/github-development-ticket/v0.1.2/files/.github/) 的内容复制到目标仓库的 `.github/`：
+
+```text
+.github/
+├── loop-engineering/
+│   ├── github-development-ticket.mjs
+│   ├── stop-hook-drain.mjs
+│   └── thread-record.mjs
+└── workflows/
+    └── github-development-ticket.yml
+```
+
+这些文件复制后就是目标项目拥有的 Workflow Instance；可以直接修改。版本号只记录它最初参考的定义版本，不会让项目依赖本仓库在线运行。
+
+### 4. 完成项目配置
+
+1. 创建 `ready-for-agent`、`development-ticket` 和 `in-progress` 三个标签。
+2. 按项目实际情况修改 Workflow 的 runner labels、默认分支、Git identity、超时和 token budget。
+3. 在 Goal 启动前安装项目依赖；如测试需要访问额外可执行文件、缓存目录或域名，把它们加入 Controller 的最小 sandbox 权限配置。
+4. 检查仓库 Actions 设置已允许创建 Pull Request。
+
+### 5. 触发第一个 Ticket
+
+1. 创建一个 open Issue，在正文中写清业务目标和可勾选的 Acceptance Criteria。
+2. 添加 `ready-for-agent`，表示内容已经可以交给 Agent。
+3. 确认它是 Development Ticket 而不是 Spec 后，添加 `development-ticket`。
+
+新增 `development-ticket` 会自动触发 Workflow。也可以在 Actions 页面手动运行 `github-development-ticket` 并输入 Issue number。第一次运行会创建 Codex Thread；后续对同一 Issue 的手动运行会恢复该 Thread，而其他 Issue 会创建自己的新 Thread。
+
+更完整的配置、停止与恢复语义见 [`github-development-ticket` v0.1.2 文档](workflow-definitions/github-development-ticket/v0.1.2/README.md)。
+
 ## 已发布定义
 
 - [`github-development-ticket` v0.1.2](workflow-definitions/github-development-ticket/v0.1.2/README.md)：当前版本；增加中断工作恢复、可调累计预算、Stop hook 收尾、取消处理和交付标签清理。
